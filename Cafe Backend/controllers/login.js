@@ -28,7 +28,7 @@ async function loginBusiness(request, response)
             let token = createTokenForClient(business);
             return response
                 .status(200)
-                .cookie("token", token, {httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 7*24*60*60*1000})
+                .cookie("token", token, {httpOnly: true, secure: false, sameSite: "lax", maxAge: 7*24*60*60*1000})
                 .json({message: "Login successful!"});
         }
     }
