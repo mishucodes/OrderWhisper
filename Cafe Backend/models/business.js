@@ -1,7 +1,7 @@
 const {createHmac, randomBytes} = require("crypto");
 const {Schema, model} = require("mongoose");
 
-const businessScehema = new Schema(
+const businessSchema = new Schema(
     {
         ownerName: {type: String, required: true},
         businessName: {type: String, required: true},
@@ -9,13 +9,16 @@ const businessScehema = new Schema(
         salt: {type: String},
         password: {type: String, required: true},
         businessIconURL: {type: String, default: "/images/defaultProfilePic.jpg"},
+        verificationToken: {type: String, required: true, unique: true, index: true},
+        verified: {type: Boolean, default: false},
+        expiresAt: {type: Date, default: Date.now, index: {expires: 600}},
     }, {timestamps: true});
 
 
-businessScehema.pre("save", function()
+businessSchema.pre("save", function()
     {
         if(!this.isModified("password")) return;
-        let salt = randomBytes(16).toString();
+        let salt = randomBytes(16).toString("hex");
         let hashedPassword = createHmac("sha256", salt).update(this.password).digest("hex");
         this.salt = salt;
         this.password = hashedPassword;
@@ -23,5 +26,5 @@ businessScehema.pre("save", function()
     });
 
 
-const Business = model("business", businessScehema);
+const Business = model("business", businessSchema);
 module.exports = Business;

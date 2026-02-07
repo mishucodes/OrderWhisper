@@ -1,6 +1,4 @@
 const Business = require("../models/business.js");
-const regExForEmail = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/; //Since I don't wanna query my DB unless I'm very sure.
-
 
 async function findThisAccount(request, response)
 {
@@ -8,7 +6,7 @@ async function findThisAccount(request, response)
     email = email?.trim().toLowerCase();
 
     if(!email) return response.status(400).json({error: "MISSING_FIELDS", message: "An Email Address is required to find an Account."});
-    if(!regExForEmail.test(email)) return response.status(400).json({error: "INVALID_EMAIL", message: "Invalid email. Please try again."});
+    if(!verifyValidEmail(email)) return response.status(400).json({error: "INVALID_EMAIL", message: "Invalid email. Please try again."});
     let business = await Business.findOne({email});
     if(!business) return response.status(404).json({error: "WRONG_EMAIL", message: "No account is associated with this email address."});
     try
@@ -26,8 +24,29 @@ async function findThisAccount(request, response)
 
 async function resetPassword(request, response)
 {
-    //sends a unique link to the email to reset password...
+    let {email} = request.body || {};
+    email = email?.trim().toLowerCase();
+    if(!verifyValidEmail(email)) return response.status(400).json({error: "INVALID_EMAIL", message: "Invalid email. Please try again."});
+    let business = await Business.findOne({email});
+    if(!business) return response.status(404).json({error: "WRONG_EMAIL", message: "No account is associated with this email address."});
+    //Sends a unique link to the email to reset password. I'll do this once I feel confident to jump to this topic.
     return response.status(200).json({message: "Check your Email to Reset the Password"});
 }
 
-module.exports = {findThisAccount, resetPassword};
+async function updatePassword(request, response)
+{
+    //check whether the ID is correct &, if correct, what user does it refer to...
+    //if everything alright, update the password in the Database...
+}
+
+
+
+
+//Helper Functions:
+function verifyValidEmail(email)
+{
+    const regExForEmail = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    return regExForEmail.test(email);
+}
+
+module.exports = {findThisAccount, resetPassword, updatePassword};
